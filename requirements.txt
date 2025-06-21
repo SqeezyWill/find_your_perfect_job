@@ -80,7 +80,6 @@ scikit-learn==1.7.0
 scipy==1.15.3
 selenium==4.33.0
 sentence-transformers==4.1.0
-setuptools
 shellingham==1.5.4
 six==1.12.0
 smart-open==7.1.0
@@ -93,7 +92,7 @@ spacy-loggers==1.0.5
 SpeechRecognition==3.8.1
 srsly==2.5.1
 sympy==1.13.3
-textract==1.6.5
+textract==1.6.3
 thinc==8.3.6
 threadpoolctl==3.6.0
 tokenizers==0.21.1
