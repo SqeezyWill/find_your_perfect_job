@@ -1,0 +1,220 @@
+{% extends "layout.html" %}
+{% block title %}Find Your Perfect Job{% endblock %}
+
+{% block head %}
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: url("{{ url_for('static', filename='images/bg_office.jpg') }}") no-repeat center center fixed;
+        background-size: cover;
+        color: #fff;
+    }
+    .overlay {
+        background-color: rgba(0, 0, 0, 0.5);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 0;
+    }
+    .main-container {
+        display: flex;
+        flex-direction: row;
+        position: relative;
+        z-index: 1;
+        padding: 40px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .sidebar {
+        width: 300px;
+        background-color: rgba(255,255,255,0.9);
+        color: #000;
+        padding: 20px;
+        border-radius: 12px;
+        margin-right: 30px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .sidebar h4 {
+        margin-top: 0;
+        color: #2c3e50;
+        font-weight: bold;
+    }
+    .content {
+        flex: 1;
+        background-color: rgba(255,255,255,0.95);
+        padding: 30px;
+        border-radius: 12px;
+        color: #000;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    input[type="file"],
+    input[type="text"],
+    textarea {
+        padding: 10px;
+        font-size: 16px;
+        width: 100%;
+    }
+    input[type="submit"] {
+        background-color: #3498db;
+        color: white;
+        padding: 12px;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 6px;
+    }
+    input[type="submit"]:hover {
+        background-color: #2980b9;
+    }
+    .results {
+        margin-top: 30px;
+        padding: 15px;
+        background-color: #ecf0f1;
+        color: #000;
+        border-radius: 10px;
+    }
+    .feedback-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .feedback-box {
+        flex: 1 1 45%;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .feedback-box h4 {
+        margin-top: 0;
+        color: #2c3e50;
+    }
+    .feedback-box ul {
+        padding-left: 20px;
+    }
+    .feedback-box li {
+        margin-bottom: 8px;
+    }
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-left: 0;
+        list-style: none;
+    }
+    .tag {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        display: inline-block;
+    }
+    .bold-section {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    /* 🔵 Circular Match Score */
+    .match-circle {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: conic-gradient(#3498db {{ match_score|default(0) }}%, #e0e0e0 0%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px auto;
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="overlay"></div>
+<div class="main-container">
+    <div class="sidebar">
+        <h4>Summary</h4>
+        <p><strong>Status:</strong> {{ "Scanned ✅" if match_score else "Awaiting Scan…" }}</p>
+        <p><strong>Job Title:</strong> {{ job_title or "N/A" }}</p>
+        <p><strong>Match Score:</strong></p>
+        <div class="match-circle">{{ match_score or 0 }}%</div>
+    </div>
+
+    <div class="content">
+        <h1>Find Your Perfect Job</h1>
+        <form action="/match" method="post" enctype="multipart/form-data">
+            <label>Upload Your CV (PDF or DOCX):</label>
+            <input type="file" name="cv_file" accept=".pdf,.doc,.docx" required>
+
+            <label>Search Job Title: </label>
+            <input type="text" name="job_title" placeholder="e.g., Credit Analyst">
+
+            <label>Paste Job Description for Comparison: </label>
+            <textarea name="job_description" rows="8" placeholder="Paste job description here..."></textarea>
+
+            <input type="submit" value="Upload & Match">
+        </form>
+
+        {% if match_score %}
+            <div class="results">
+                <h3>Match Score:</h3>
+                <p>{{ match_score }}%</p>
+            </div>
+        {% endif %}
+
+        {% if suggested_roles %}
+            <div class="results">
+                <h3>More Compatible Roles Based on CV and JD:</h3>
+                <ul>
+                    {% for role in suggested_roles %}
+                        <li>{{ role }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if cv_feedback %}
+            <div class="results">
+                <h3>What to Improve on CV to Be More Suitable for the Role:</h3>
+                <div class="feedback-section">
+                    <div class="feedback-box" style="flex: 1 1 100%;">
+                        {{ cv_feedback | safe }}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if match_score %}
+            <div class="results">
+                <h3>Was this Match Accurate?</h3>
+                <form action="/feedback" method="post">
+                    <label>Job Title Used:</label>
+                    <input type="text" name="job_title" placeholder="e.g., Credit Analyst" required>
+
+                    <label>Your Assessment Score (0–100):</label>
+                    <input type="number" name="actual_score" min="0" max="100" step="1" required>
+
+                    <input type="submit" value="Submit Feedback">
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

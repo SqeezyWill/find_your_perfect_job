@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.env
+uploads/
+*.db
+*.sqlite3
+admin_config.json
+instance/
+
